@@ -54,6 +54,7 @@ Start by loading the `ISLR2` package, which is a very large collection of datase
 
 library(ISLR2)
 library(lme4)
+library(ggplot2)
 ```
 
 ## Boston Housing Data
@@ -85,7 +86,7 @@ lm.model <- lm(medv ~ rm, data = Boston)
 If you set it up right, you should be able to run your model name in the below code chunk and view the basic model output. Give it a try:
 
 ```{r}
-summary(lm.model)
+lm.model
 ```
 
 ### Question 5
@@ -94,7 +95,7 @@ What is your model output telling you?
 
 #### Answer
 
-The model is not great given that it runs with about 48.35% accuracy.
+The model is not very good. The model output says that when there are no rooms, the median value of the house - \$34,671, and for each one unit increase in the number of rooms, there is a \$9,102 increase in the median value of the house. This isn't plausible because even a one or two room house is still predicted to have a negative median value.
 
 You can also try `summary(lm.model)`.
 
@@ -108,7 +109,7 @@ What additional information do you get from this summary of the model output?
 
 #### Answer
 
-(write your answer here)
+The model is not great given that it runs with about 48.35% accuracy. The low p-value indicates that the average number of rooms per dwelling is statistically significant in predicting the median value of owner-occupied homes in \$1000s.
 
 ## confint() and predict()
 
@@ -128,7 +129,9 @@ What do you think the above `confint()` and `predict()` information means? It's 
 
 #### Answer
 
-(write your answer here)
+`confint()`  - The model has a 95% confidence that the intercept (the median value of a house when the number of rooms equals zero) is between roughly -\$39,877 and -\$29,465 and that for each one unit increase in the number of rooms, there is between roughly \$8,279 and \$9,925 increase in the median value of the house.
+
+`predict()`  - The model uses past data to create confidence intervals and prediction intervals for the prediction of `medv` for a given value of `rm`, in this case 2, 4, 8. For 2 rooms, the model created a confidence interval of median home values roughly between -\$229 and \$3,705, meaning that based on the data used a house with 2 rooms will be valued within that interval. The model created a prediction interval of median home values roughly between -\$11,409 and \$14,885, meaning that based on the data used a house with 2 rooms is predicted to be valued within that interval.
 
 ## Visualizing
 
@@ -144,7 +147,9 @@ abline(lm.model)
 Can you convert the above code chunk to `ggplot`? Try below. Have fun with editing the appearance of your plot if you'd like :)
 
 ```{r}
-
+ggplot(Boston, aes(rm, medv)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
 ```
 
 In a future class, we'll explore some diagnostic plots and what that means for evaluating models. For now, just run the below and have a look. Have you seen these before?
