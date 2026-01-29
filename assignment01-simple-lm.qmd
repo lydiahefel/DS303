@@ -171,7 +171,7 @@ What variables are you interested in exploring using a linear regression? Just p
 
 #### Answer
 
-(write your answer here)
+How does the pupil-teacher ratio by town (`ptratio`) influence the median value of owner-occupied homes in \$1000s (`medv`)?
 
 ### Question 10
 
@@ -180,10 +180,8 @@ What variables are you interested in exploring using a linear regression? Just p
 Build and run your model and examine the model output:
 
 ```{r}
-
-
-
-
+lm.model <- lm(medv ~ ptratio, data = Boston)
+summary(lm.model)
 ```
 
 #### Part 2
@@ -192,7 +190,7 @@ Explain what you found in plain English. Do your best.
 
 #### Answer
 
-(write your answer here)
+The model is quite inaccurate given that it runs with about 25.78% accuracy. The low p-value indicates that the pupil-teacher ratio by town is statistically significant in predicting the median value of owner-occupied homes in \$1000s.
 
 ## The end!
 
