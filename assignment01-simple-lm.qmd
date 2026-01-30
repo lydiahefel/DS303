@@ -109,7 +109,7 @@ What additional information do you get from this summary of the model output?
 
 #### Answer
 
-The model is not great given that it runs with about 48.35% accuracy. The low p-value indicates that the average number of rooms per dwelling is statistically significant in predicting the median value of owner-occupied homes in \$1000s.
+The multiple R-squared value shows that 48.35% of the variance of median home value can be accounted for by the number of rooms. The low p-value indicates that the average number of rooms per dwelling is statistically significant in predicting the median value of owner-occupied homes in \$1000s. The summary also gives the range of residuals and the standard error.
 
 ## confint() and predict()
 
@@ -131,7 +131,7 @@ What do you think the above `confint()` and `predict()` information means? It's 
 
 `confint()`  - The model has a 95% confidence that the intercept (the median value of a house when the number of rooms equals zero) is between roughly -\$39,877 and -\$29,465 and that for each one unit increase in the number of rooms, there is between roughly \$8,279 and \$9,925 increase in the median value of the house.
 
-`predict()`  - The model uses past data to create confidence intervals and prediction intervals for the prediction of `medv` for a given value of `rm`, in this case 2, 4, 8. For 2 rooms, the model created a confidence interval of median home values roughly between -\$229 and \$3,705, meaning that based on the data used a house with 2 rooms will be valued within that interval. The model created a prediction interval of median home values roughly between -\$11,409 and \$14,885, meaning that based on the data used a house with 2 rooms is predicted to be valued within that interval.
+`predict()`  - The model uses past data to create confidence intervals and prediction intervals for the prediction of `medv` for a given value of `rm`, in this case 4, 6, 8. For 4 rooms, the model created a confidence interval of median home values roughly between -\$229 and \$3,705, meaning that based on the data used a house with 4 rooms will be valued within that interval. The model created a prediction interval of median home values roughly between -\$11,409 and \$14,885, meaning that based on the data used a house with 4 rooms is predicted to be valued within that interval.
 
 ## Visualizing
 
@@ -190,7 +190,7 @@ Explain what you found in plain English. Do your best.
 
 #### Answer
 
-The model is quite inaccurate given that it runs with about 25.78% accuracy. The low p-value indicates that the pupil-teacher ratio by town is statistically significant in predicting the median value of owner-occupied homes in \$1000s.
+The multiple R-squared value shows that 25.78% of the variance of median home value can be accounted for by the pupil-teacher ratio by town. The low p-value indicates that the pupil-teacher ratio by town is statistically significant in predicting the median value of owner-occupied homes in \$1000s.
 
 ## The end!
 
