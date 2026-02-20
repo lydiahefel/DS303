@@ -158,7 +158,15 @@ summary(simple)
 
 Summarize these findings. What is your reference group, and how do the other groups compare with regards to their writing scores? What does the intercept value represent?\
 \
-(write here)\
+The reference group is `race.f1`, the other groups writing scores are all higher in comparison to the reference group.
+
+For every one unit increase in `race.f2`, the writing score is roughly 11.54 points higher than `race.f1`.
+
+For every one unit increase in `race.f3`, the writing score is roughly 1.74 points higher than `race.f1`.
+
+For every one unit increase in `race.f4`, the writing score is roughly 7.59 points higher than `race.f1`.
+
+The intercept value represents the overall grand mean, rather than only the reference level.
 
 ## Deviation Coding (a.k.a. Effect Coding)
 
