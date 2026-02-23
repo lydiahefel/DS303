@@ -132,7 +132,7 @@ Summarize these findings. What is your reference group, and how do the other gro
 
 4.  What are the limitations of this coding method? Are there situations where this method may lead to misleading results or interpretations?
 
-    A limitation of simple coding is that the reference level is a variable that may not always be an actual baseline, only because it came first alphabetically or numerically. The contrast matrix is a bit more confusing than dummy coding (i.e. -1/k and (k-1)/k).
+    A limitation of simple coding is that the reference level is a variable that may not always be an actual baseline, only because it came first alphabetically or numerically. The contrast matrix is a bit more confusing than dummy coding. Each row reprensents one level of the original variable and there's k-1 columns. However, the matrix columns use -1/k and (k-1)/k values to avoid collinearity, to maintain that the contrast sums to zero and to keep the intercept the grand mean. A non-zero reference level helps to shift the intercept to the overall mean rather than the reference mean.
 
 ### Applying Simple Coding
 
