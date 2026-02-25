@@ -166,7 +166,9 @@ For every one unit increase in `race.f3`, the writing score is roughly 1.74 poin
 
 For every one unit increase in `race.f4`, the writing score is roughly 7.59 points higher than `race.f1`.
 
-The intercept value represents the overall grand mean, rather than only the reference level.
+The `intercept` value of 51.68 represents the overall grand mean.
+
+The mean of the reference level (i.e. `race.f1`) is not listed in the output.
 
 ## Deviation Coding (a.k.a. Effect Coding)
 
