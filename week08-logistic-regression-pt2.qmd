@@ -116,6 +116,12 @@ Apply a logistic regression to predict the outcome of `response` with all predic
 ```{r}
 m_bg <- glm(response_label ~ language + age + device + trial + hue, data = colors, family = binomial)
 summary(m_bg)
+
+contrasts(colors$response_label)
+levels(colors$response_label)
+
+colors$response_label <- relevel(colors$response_label, ref = "blue")
+contrasts(colors$response_label)
 ```
 
 What can you interpret from this model output?
@@ -265,7 +271,7 @@ Explore the data visually.
 
 ```{r}
 # point plot to see how Petal.Length and Species are related
-ggplot(iris, aes(x = Petal.Length, y = Species)) +
+ggplot(iris, aes(x = Petal.Length, y = Species, color = Species)) +
   geom_jitter()
 
 ```
@@ -304,41 +310,42 @@ Interpretation of `iris_model`: (Remember we coded `versicolor` = 0 and `virgini
 
 -   **(Intercept)**: -43.781
 
-    -   This is the log-odds of being classified as "virginica" when petal length is zero
+    -   This is the log-odds of being classified as `virginica` when petal length is zero
     -   This value is not practically meaningful as petal lengths in the dataset are positive
 
 -   **`Petal.Length`**: 9.002
 
-    -   For each one-unit increase in petal length, the log-odds of a flower being classified as "virginica" (rather than "versicolor") significantly increases
+    -   For each one-unit increase in petal length, the log-odds of a flower being classified as `virginica` (rather than `versicolor`) significantly increases
 
-    -   Since the coefficient is positive, it suggests that as petal length increases, the log-odds of being classified as "virginica" significantly increases, compared to "versicolor"
+    -   Since the coefficient is positive, it suggests that as petal length increases, the log-odds of being classified as `virginica` significantly increases, compared to `versicolor`
 
         -   To interpret it in terms of odds, you can exponentiate the coefficient:
 
             Odds Ratio = e^9.002^ ≈ 8,119.306
 
-        -   This means that for each additional centimeter of petal length, the odds of a flower being classified as "virginica" rather than "versicolor" increase by a factor of approximately 8119, indicating a very strong relationship.
+        -   This means that for each additional centimeter of petal length, the odds of a flower being classified as `virginica` rather than `versicolor` increase by a factor of approximately 8119, indicating a very strong relationship.
 
 # Practice on your own
 
 ## Apply your own logistic regression to `iris`
 
-Edit the below to predict `Species` status based a predictor of your choice. You will need to subset your data (or just use `iris_subset` from above).
+Edit the below to predict `Species` status based on a predictor of your choice. You will need to subset your data (or just use `iris_subset` from above).
 
 ```{r}
-flower <- glm(Species_num ~ ?, data = iris_subset, family = binomial)
+flower <- glm(Species_num ~ Petal.Width, data = iris_subset, family = binomial)
 summary(flower)
 ```
 
 Interpretation of Estimate coefficients:
 
--   **(Intercept)**: ??
+-   **(Intercept)**: -21.126
 
-    -   This is the log-odds of \_\_\_\_\_.
+    -   This is the log-odds of being classified as `virginica` when petal width is zero.
 
--   **your predictor**: ??
+-   **Petal.Width**: 12.947
 
-    -   This coefficient represents\_\_\_\_.
+    -   This coefficient represents, for each one-unit increase in petal width, the log-odds of a flower being classified as `virginica` (rather than `versicolor`) significantly increases.
+    -   Since the coefficient is positive, it suggests that as petal width increases, the log-odds of being classified as `virginica` significantly increases, compared to `versicolor`.
 
 ## Try a new data set! `citrus`
 
@@ -357,20 +364,24 @@ citrus %>%
             mean_weight = mean(weight),
             mean_hue = mean(hue))
 
-# do some EDA :)
+citrus$hue <- replace(citrus$hue, citrus$hue > 300, 27)
 
+# do some EDA :)
+ggplot(citrus, aes(y = hue, x = fruit, color = fruit)) +
+  geom_jitter()
 
 # build a model
-fruit <- glm(fruit ~ ?, data = citrus, family = binomial)
+fruit <- glm(fruit ~ hue, data = citrus, family = binomial)
 summary(fruit)
 ```
 
 Interpretation of Estimate coefficients:
 
--   **(Intercept)**: ??
+-   **(Intercept)**: -6.26513
 
-    -   This is the log-odds of \_\_\_\_\_.
+    -   This is the log-odds of being classified as `grapefruit` when hue is zero.
 
--   **your predictor**: ??
+-   **hue**: 0.23060
 
-    -   This coefficient represents\_\_\_\_.
+    -   This coefficient represents, for each one-unit increase in hue, the log-odds of a fruit being classified as `grapefruit` (rather than `orange`) increases.
+    -   Since the coefficient is slightly positive, it suggests that as hue increases, the log-odds of being classified as `grapefruit` significantly increases, compared to `orange`.

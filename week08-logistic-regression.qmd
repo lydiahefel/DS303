@@ -1,7 +1,7 @@
 ---
 title: "Logistic Regression"
 author: 
-  - "Student Name"
+  - "Lydia Hefel"
   - "DS303, SP25"
   - "Prof. Amber Camp"
 date: 2/24/25
