@@ -258,9 +258,9 @@ What are your key takeaways from this model?
 
 -   `flipper_length_mm`: 0.03822
 
-    -   For each one-unit increase in `flipper_length_mm`, the log-odds of a penguin being classified as `female` (rather than `male`) increases by 0.03822 units, this coefficient is statistically significant.
+    -   For each one-unit increase in `flipper_length_mm`, the log-odds of a penguin being classified as `female` (rather than `male`) decreases by 0.03822 units, this coefficient is statistically significant.
 
-    -   Since the coefficient is positive, it suggests that as `flipper_length_mm` increases, the log-odds of being classified as `female` significantly increases, compared to `male`.
+    -   Since the coefficient is positive, it suggests that as `flipper_length_mm` increases, the log-odds of being classified as `female` significantly decreases, compared to `male`.
 
 ## Question 10: Synthesize the information
 
@@ -268,7 +268,7 @@ Imagine you’re a biologist studying penguin populations. Which predictors do y
 
 **Answer:**
 
--   Imagining myself as a biologist studying penguin populations, the most important predictors to measure or record in the field to predict flipper length are body mass, bill depth, species, and island. The EDA from Question 2 showed that these variables led to the most distinguishable outputs, and are able to help determine flipper length. A record of these predictors, and the interactions amongst these predictors, could help create better models that can more accurately predict flipper length.
+-   Imagining myself as a biologist studying penguin populations, the most important predictors to measure or record in the field to predict flipper length are body mass, bill depth, species, and island. The EDA from Question 2 showed that these variables led to the most distinguishable outputs, and are able to help determine flipper length. A record of these predictors, and the interactions among these predictors, could help create better models that can more accurately predict flipper length.
 
 ## Bonus: Stepwise Regression
 
@@ -283,3 +283,74 @@ According to this stepwise regression, explain how the final model was selected.
 
 **Answer:**\
 (Write answer here)
+
+## Add Mixed Effects Models
+
+```{r}
+ggplot(penguins, aes(flipper_length_mm, body_mass_g, color = species)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+### Fixed Effects Only Model
+
+```{r}
+m_fixed <- lm(flipper_length_mm ~ body_mass_g + species, data = penguins)
+summary(m_fixed)
+```
+
+### Random Intercepts Model
+
+```{r}
+library(lmerTest)
+
+m_ri <- lmer(flipper_length_mm ~ body_mass_g + (1 | species), data = penguins)
+summary(m_ri)
+
+ranef(m_ri)
+```
+
+### Random Intercepts + Random Slopes
+
+```{r}
+m_ris <- lmer(flipper_length_mm ~ body_mass_g + (1 + body_mass_g | species), data = penguins)
+summary(m_ris)
+
+ranef(m_ris)
+```
+
+### Model Comparison
+
+```{r}
+anova(m_ri, m_ris)
+#anova(m_fixed, m_ri) - cannot compare fixed and mixed effect models with anova
+
+AIC(m_fixed, m_ri)
+```
+
+## Revisit Sleep Study
+
+```{r}
+sleepstudy <- sleepstudy
+
+ggplot(sleepstudy, aes(x = Days, y = Reaction)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal()
+
+sleep_fixed <- lm(Reaction ~ Days, data = sleepstudy)
+summary(sleep_fixed)
+
+sleep_mixed <- lmer(Reaction ~ Days + (1 | Subject), data = sleepstudy)
+summary(sleep_mixed)
+
+AIC(sleep_fixed, sleep_mixed)
+```
+
+### R-Squared
+
+```{r}
+#install.packages("MuMIn")
+library(MuMIn)
+r.squaredGLMM(sleep_mixed)
+```
