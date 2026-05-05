@@ -1,0 +1,287 @@
+---
+title: "Risk Factors as Predictors of Cervical Cancer"
+subtitle: "Prediction of Cervical Cancer Indicators"
+author: "Lydia Hefel"
+institute: "Chaminade University"
+date: 5/4/25
+format: 
+  revealjs:
+    theme: dracula
+editor: visual
+---
+
+## Background
+
+::: incremental
+-   \~11, 000 new cases a year in the U.S.
+
+-   Number of new cases declining over the years
+
+-   Takes 4,000 U.S. lives and 300,000 lives worldwide each year
+
+-   Labeled the most preventable cancer
+
+-   Screenings (i.e. pap smears) can detect pre-cancerous cells
+:::
+
+## Research Question
+
+Which risk factors are the best predictors of whether or not a person is diagnosed with cervical cancer?
+
+<br>
+
+. . .
+
+**Why it matters...**
+
+. . .
+
+-   Most preventable cancer yet 300,000 deaths worldwide each year
+
+-   Understand high risk lifestyle choices
+
+-   Improve detection process
+
+-   Better prevention
+
+## Dataset {.smaller}
+
+-   Found on **Kaggle** - *Cervical Cancer Risk Classification*
+
+-   Sourced from **UCI ML Repository** - *Cervical Cancer Risk Factors for Biopsy*
+
+-   Collected at **Hospital Universitario de Caracas** in *Caracas, Venezuela*
+
+<br>
+
+. . .
+
+***Why this dataset?***
+
+. . .
+
+-   Risk factor classification
+
+-   Publicly available with multiple copies
+
+<br>
+
+. . .
+
+***Key Variables***
+
+. . .
+
+-   Hypothesis: `num_of_pregnancies` and `first_sexual_intercourse`
+
+-   Results: `dx_hpv`, `smokes`, and `num_of_pregnancies`
+
+## Data Cleaning Process {.smaller}
+
+<br>
+
+```{r}
+library(tidyverse)
+library(lme4)
+library(lmerTest)
+library(plotly)
+library(patchwork)
+library(here)
+library(janitor)
+library(dplyr)
+library(plotly)
+library(ISLR2)
+```
+
+```{r, echo=TRUE, output=FALSE}
+project_data <- read_csv(here("data/kag_risk_factors_cervical_cancer.csv"))
+
+project_data <- clean_names(project_data)
+
+project_data <- project_data %>%
+  rename_with(~ gsub("st_ds", "stds", .))
+
+colSums(project_data == "?", na.rm = TRUE)
+
+project_data <- project_data %>%
+  mutate(across(where(is.character), ~na_if(.,"?")))
+
+project_data <- project_data %>%
+  mutate(across(where(is.numeric), as.factor))
+
+project_data <- project_data %>%
+  mutate(across(where(is.character), as.numeric))
+
+project_data <- project_data %>%
+  mutate(across(c(iud, stds, smokes, hormonal_contraceptives), as.factor))
+
+project_data <- project_data %>%
+  mutate(across(c(age), as.numeric))
+
+#stds_time_since_first_diagnosis and stds_time_since_last_diagnosis only ~8% complete
+```
+
+## Exploratory Data Analysis I
+
+<br>
+
+```{r}
+ggplotly(ggplot(project_data, aes(x = dx_cancer, y = num_of_pregnancies, color = first_sexual_intercourse)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal() +
+  labs(title = "Cervical Cancer Diagnoses by Number of Pregnancies and Age of First Sexual Intercourse",
+       x = "Cervical Cancer Diagnosis",
+       y = "Number of Pregnancies",
+       color = "Age of First Sexual\n      Intercourse"))
+```
+
+## Exploratory Data Analysis II
+
+<br>
+
+```{r}
+ggplotly(ggplot(project_data, aes(x = dx_cancer, y = smokes, color = smokes_packs_year)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal() +
+  labs(title = "Cervical Cancer Diagnoses by Patient Smoking Frequency",
+       x = "Cervical Cancer Diagnosis",
+       y = "Patient Smokes",
+       color = "Average Number of Packs\n   Patient Smokes Yearly"))
+```
+
+## Exploratory Data Analysis III
+
+<br>
+
+```{r}
+ggplotly(ggplot(project_data, aes(x = dx_cancer, y = dx_hpv, color = age)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal() +
+  labs(title = "Cervical Cancer Diagnoses by HPV Diagnoses and Patient Age",
+       x = "Cervical Cancer Diagnosis",
+       y = "HPV Diagnosis",
+       color = "Patient Age"))
+```
+
+## Logistic Regression Model I {.smaller}
+
+<br>
+
+```{r}
+vars <- c("dx_cancer", "dx_hpv", "num_of_pregnancies", "smokes")
+clean_data <- project_data[complete.cases(project_data[, vars]), ]
+```
+
+```{r, echo=TRUE, output=FALSE}
+hpv_diagnosis <- glm(dx_cancer ~ dx_hpv, clean_data, family = binomial)
+```
+
+```{r, echo=FALSE, output=TRUE}
+hpv_diagnosis <- glm(dx_cancer ~ dx_hpv, clean_data, family = binomial) 
+summary(hpv_diagnosis) 
+```
+
+## Logistic Regression Model II {.smaller}
+
+<br>
+
+```{r, echo=TRUE, output=FALSE}
+hpv_pregnancies <- glm(dx_cancer ~ dx_hpv : num_of_pregnancies, clean_data, family = binomial) 
+```
+
+```{r, echo=FALSE, output=TRUE}
+hpv_pregnancies <- glm(dx_cancer ~ dx_hpv : num_of_pregnancies, clean_data, family = binomial) 
+summary(hpv_pregnancies)
+```
+
+## Logistic Regression Model III {.smaller}
+
+<br>
+
+```{r, echo=TRUE, output=FALSE}
+hpv_smoking <- glm(dx_cancer ~ dx_hpv : smokes, clean_data, family = binomial)
+```
+
+```{r, echo=FALSE, output=TRUE}
+hpv_smoking <- glm(dx_cancer ~ dx_hpv : smokes, clean_data, family = binomial)
+summary(hpv_smoking)
+```
+
+## Logistic Regression Model IV {.smaller}
+
+<br>
+
+```{r, echo=TRUE, output=FALSE}
+combined <- glm(dx_cancer ~ dx_hpv : num_of_pregnancies : smokes, clean_data, family = binomial)
+```
+
+```{r, echo=FALSE, output=TRUE}
+all <- glm(dx_cancer ~ dx_hpv : num_of_pregnancies : smokes, clean_data, family = binomial)
+summary(all)
+```
+
+## ANOVA Model Comparison
+
+::::: columns
+::: {.column width="50%"}
+```{r, echo=TRUE}
+anova(hpv_diagnosis, hpv_pregnancies, all)
+```
+:::
+
+::: {.column width="50%"}
+```{r, echo=TRUE}
+anova(hpv_diagnosis, hpv_smoking, all)
+```
+:::
+:::::
+
+## AIC Model Comparison
+
+<br>
+
+```{r, echo=TRUE}
+AIC(hpv_diagnosis, hpv_pregnancies, hpv_smoking, all)
+```
+
+## Findings
+
+<br>
+
+. . .
+
+HPV diagnosis was the most statistically significant predictor of cervical cancer.
+
+<br>
+
+. . .
+
+Number of pregnancies and smoking frequency were not significant on their own...
+
+. . .
+
+but they became significant when interacting with HPV diagnosis.
+
+## Limitations
+
+::: incremental
+-   Dataset size
+
+-   Variable definitions
+
+-   Demographic representation
+:::
+
+<br>
+
+. . .
+
+### **Ethical Considerations**
+
+::: incremental
+-   Patient privacy
+
+-   Consent to patient data
+:::
+
+# Thank you!
