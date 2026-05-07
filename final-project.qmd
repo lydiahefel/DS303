@@ -1,9 +1,9 @@
 ---
-title: "Risk Factors as Predictors of Cervical Cancer"
+title: "<span style='font-size:90px;'>Risk Factors as Predictors of Cervical Cancer</span>"
 subtitle: "Prediction of Cervical Cancer Indicators"
 author: "Lydia Hefel"
 institute: "Chaminade University"
-date: 5/4/25
+date: 5/7/26
 format: 
   revealjs:
     theme: dracula
@@ -17,7 +17,7 @@ editor: visual
 
 -   Number of new cases declining over the years
 
--   Takes 4,000 U.S. lives and 300,000 lives worldwide each year
+-   \~300,000 worldwide and \~4,000 U.S. death annually
 
 -   Labeled the most preventable cancer
 
@@ -267,7 +267,7 @@ but they became significant when interacting with HPV diagnosis.
 ::: incremental
 -   Dataset size
 
--   Variable definitions
+-   Missing data (NA/?)
 
 -   Demographic representation
 :::
@@ -283,5 +283,90 @@ but they became significant when interacting with HPV diagnosis.
 
 -   Consent to patient data
 :::
+
+# Bonus Slides...
+
+## Logistic Regression Model II Part II {.smaller}
+
+<br>
+
+```{r, echo=TRUE, output=FALSE}
+hpv_pregnancies2 <- glm(dx_cancer ~ dx_hpv * num_of_pregnancies, clean_data, family = binomial) 
+```
+
+```{r, echo=FALSE, output=TRUE}
+hpv_pregnancies2 <- glm(dx_cancer ~ dx_hpv * num_of_pregnancies, clean_data, family = binomial) 
+summary(hpv_pregnancies2)
+```
+
+## Logistic Regression Model III Part II {.smaller}
+
+<br>
+
+```{r, echo=TRUE, output=FALSE}
+hpv_smoking2 <- glm(dx_cancer ~ dx_hpv * smokes, clean_data, family = binomial)
+```
+
+```{r, echo=FALSE, output=TRUE}
+hpv_smoking2 <- glm(dx_cancer ~ dx_hpv * smokes, clean_data, family = binomial)
+summary(hpv_smoking2)
+```
+
+## Logistic Regression Model IV Part II {.smaller}
+
+<br>
+
+```{r, echo=TRUE, output=FALSE}
+combined2 <- glm(dx_cancer ~ dx_hpv * num_of_pregnancies * smokes, clean_data, family = binomial)
+```
+
+```{r, echo=FALSE, output=TRUE}
+all2 <- glm(dx_cancer ~ dx_hpv * num_of_pregnancies * smokes, clean_data, family = binomial)
+summary(all2)
+```
+
+## ANOVA Model Comparison Part II
+
+<br>
+
+::::: columns
+::: {.column width="50%"}
+```{r, echo=TRUE}
+anova(hpv_diagnosis, hpv_pregnancies2, all2)
+```
+:::
+
+::: {.column width="50%"}
+```{r, echo=TRUE}
+anova(hpv_diagnosis, hpv_smoking2, all2)
+```
+:::
+:::::
+
+## AIC Model Comparison Part II
+
+<br>
+
+```{r, echo=TRUE}
+AIC(hpv_diagnosis, hpv_pregnancies2, hpv_smoking2, all2)
+```
+
+## Findings Part II
+
+<br>
+
+. . .
+
+When adding the main effect, key variables and their interactions held less significance.
+
+<br>
+
+. . .
+
+The ANOVA comparisons had found the `combined2` model to be the best...
+
+. . .
+
+while the AIC comparison had found the `hpv_diagnosis` model to be the best.
 
 # Thank you!
