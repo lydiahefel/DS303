@@ -1,5 +1,272 @@
 ---
-title: "project_work"
+title: "Final Project Work"
+author: 
+  - "DS303, SP26"
+  - "Lydia Hefel"
+date: 5/4/26
 format: html
 ---
 
+### Load your packages
+
+```{r}
+library(tidyverse)
+library(lme4)
+library(lmerTest)
+library(plotly)
+library(patchwork)
+library(here)
+library(janitor)
+library(dplyr)
+library(plotly)
+library(ISLR2)
+```
+
+### Load your data
+
+```{r}
+project_data <- read_csv(here("data/kag_risk_factors_cervical_cancer.csv"))
+```
+
+### Clean your data
+
+```{r}
+project_data <- clean_names(project_data)
+
+project_data <- project_data %>%
+  rename_with(~ gsub("st_ds", "stds", .))
+
+colSums(project_data == "?", na.rm = TRUE)
+
+project_data <- project_data %>%
+  mutate(across(where(is.character), ~na_if(.,"?")))
+
+project_data <- project_data %>%
+  mutate(across(where(is.numeric), as.factor))
+
+project_data <- project_data %>%
+  mutate(across(where(is.character), as.numeric))
+
+project_data <- project_data %>%
+  mutate(across(c(iud, stds, smokes, hormonal_contraceptives), as.factor))
+
+project_data <- project_data %>%
+  mutate(across(c(age), as.numeric))
+
+#project_data <- project_data %>%
+#  mutate(id = row_number())
+
+summary(project_data)
+
+skim <- skimr::skim(project_data)
+
+# stds_time_since_first_diagnosis and stds_time_since_last_diagnosis only ~8% complete
+```
+
+### Explore your data
+
+Before you start removing outliers, visualize your data! You might want to:
+
+-   Make a scatterplot
+-   Color by variable
+-   Look for obvious outliers
+
+```{r}
+ggplot(project_data, aes(x = dx_cancer, y = num_of_pregnancies, color = first_sexual_intercourse)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal()
+
+#boxplots
+ggplot(project_data, aes(x = dx_cancer, y = num_of_pregnancies)) +
+  geom_boxplot(na.rm = TRUE) +
+  theme_minimal()
+
+ggplot(project_data, aes(x = dx_cancer, y = first_sexual_intercourse)) +
+  geom_boxplot(na.rm = TRUE) +
+  theme_minimal()
+
+#scatter plots
+ggplot(project_data, aes(x = dx_cancer, y = num_of_pregnancies, color = age)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal()
+
+ggplot(project_data, aes(x = dx_cancer, y = first_sexual_intercourse)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal()
+
+#correlation
+ggplot(project_data, aes(x = dx_cancer, y = dx_hpv)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal()
+
+ggplot(project_data, aes(x = dx_cancer, y = age, color = age)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal()
+
+ggplot(project_data, aes(x = dx_cancer, 
+                         y = as.factor(number_of_sexual_partners), 
+                         color = as.factor(number_of_sexual_partners))) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal()
+
+ggplot(project_data, aes(x = dx_cancer, y = iud)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal()
+
+#interesting
+ggplot(project_data, aes(x = dx_cancer, y = stds_hpv)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal()
+
+ggplot(project_data, aes(x = dx_cancer, y = stds)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal()
+
+ggplot(project_data, aes(x = dx_cancer, y = smokes)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal()
+
+#interesting
+ggplot(project_data, aes(x = dx_cancer, y = smokes_years)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal()
+
+ggplot(project_data, aes(x = dx_cancer, y = smokes_packs_year)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal()
+
+ggplot(project_data, aes(x = dx_cancer, y = hormonal_contraceptives)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal()
+
+ggplot(project_data, aes(x = dx_cancer, y = hormonal_contraceptives_years)) +
+  geom_jitter(na.rm = TRUE) +
+  theme_minimal()
+```
+
+### Logistic Regression Models
+
+```{r}
+#not significant
+num_of_pregnancies <- glm(dx_cancer ~ num_of_pregnancies, data = project_data, family = binomial)
+summary(num_of_pregnancies)
+
+#slightly signifincant - .
+first_sexual_intercourse <- glm(dx_cancer ~ first_sexual_intercourse, data = project_data, family = binomial)
+summary(first_sexual_intercourse)
+
+#very significant - ***
+dx_hpv <- glm(dx_cancer ~ dx_hpv, data = project_data, family = binomial)
+summary(dx_hpv)
+
+#not significant
+stds_hpv <- glm(dx_cancer ~ stds_hpv, data = project_data, family = binomial)
+summary(stds_hpv)
+
+#not significant
+smokes_years <- glm(dx_cancer ~ smokes_years, data = project_data, family = binomial)
+summary(smokes_years)
+
+#not significant
+stds <- glm(dx_cancer ~ stds, data = project_data, family = binomial)
+summary(stds)
+
+#not significant
+number_of_sexual_partners <- glm(dx_cancer ~ number_of_sexual_partners, data = project_data, family = binomial)
+summary(number_of_sexual_partners)
+
+#no dx_hpv + num_of_pregnancies is slightly significant - *
+#yes dx_hpv + num_of_prenancies is slightly more signifacnt - **
+hpv_pregnancies <- glm(dx_cancer ~ dx_hpv : num_of_pregnancies, data = project_data, family = binomial)
+summary(hpv_pregnancies)
+
+hpv_pregnancies2 <- glm(dx_cancer ~ dx_hpv + num_of_pregnancies, data = project_data, family = binomial)
+summary(hpv_pregnancies2)
+
+#not significant
+smokes <- glm(dx_cancer ~ smokes, data = project_data, family = binomial)
+summary(smokes)
+
+#not significant
+smokes_years <- glm(dx_cancer ~ smokes_years, data = project_data, family = binomial)
+summary(smokes_years)
+
+#slightly significant - *
+smokes_packs_year <- glm(dx_cancer ~ smokes_packs_year, data = project_data, family = binomial)
+summary(smokes_packs_year)
+
+
+#slightly significant - *
+smoking <- glm(dx_cancer ~ smokes : smokes_years : smokes_packs_year, data = project_data, family = binomial)
+summary(smoking)
+
+# no hpv + no smoking is significant - ***
+hpv_smoking <- glm(dx_cancer ~ dx_hpv : smokes, data = project_data, family = binomial)
+summary(hpv_smoking)
+
+#not significant
+hpv_smoking2 <- glm(dx_cancer ~ dx_hpv : smokes_years, data = project_data, family = binomial)
+summary(hpv_smoking2)
+
+# statistically significant - ***
+hpv_smoking3 <- glm(dx_cancer ~ dx_hpv : smokes_packs_year, data = project_data, family = binomial)
+summary(hpv_smoking3)
+```
+
+### **Model Comparison**
+
+```{r}
+nobs(dx_hpv)
+nobs(hpv_pregnancies)
+nobs(hpv_smoking)
+#nobs(hpv_smoking3)
+nobs(all)
+
+
+vars <- c("dx_cancer", "dx_hpv", "num_of_pregnancies", "smokes", "smokes_packs_year")
+clean_data <- project_data[complete.cases(project_data[, vars]), ]
+
+dx_hpv <- glm(dx_cancer ~ dx_hpv, clean_data, family = binomial)
+summary(dx_hpv) 
+
+hpv_pregnancies <- glm(dx_cancer ~ dx_hpv : num_of_pregnancies, clean_data, family = binomial) 
+summary(hpv_pregnancies)
+
+hpv_pregnancies2 <- glm(dx_cancer ~ dx_hpv * num_of_pregnancies, clean_data, family = binomial) 
+summary(hpv_pregnancies2)
+
+hpv_smoking <- glm(dx_cancer ~ dx_hpv : smokes, clean_data, family = binomial)
+summary(hpv_smoking)
+
+hpv_smoking2 <- glm(dx_cancer ~ dx_hpv * smokes, clean_data, family = binomial)
+summary(hpv_smoking2)
+
+#hpv_smoking3 <- glm(dx_cancer ~ dx_hpv : smokes_packs_year, clean_data, family = binomial)
+#summary(hpv_smoking3)
+
+all <- glm(dx_cancer ~ dx_hpv : num_of_pregnancies : smokes, clean_data, family = binomial)
+summary(all)
+
+all2 <- glm(dx_cancer ~ dx_hpv * num_of_pregnancies * smokes, clean_data, family = binomial)
+summary(all2)
+
+anova(dx_hpv, hpv_pregnancies)
+anova(dx_hpv, hpv_pregnancies2)
+
+anova(dx_hpv, hpv_pregnancies, all)
+anova(dx_hpv, hpv_pregnancies2, all)
+anova(dx_hpv, hpv_pregnancies2, all2)
+
+anova(dx_hpv, hpv_smoking)
+anova(dx_hpv, hpv_smoking2)
+
+anova(dx_hpv, hpv_smoking, all)
+anova(dx_hpv, hpv_smoking2, all)
+anova(dx_hpv, hpv_smoking2, all2)
+
+anova(dx_hpv, all)
+anova(dx_hpv, all2)
+
+AIC(dx_hpv, hpv_pregnancies, hpv_smoking, all)
+AIC(dx_hpv, hpv_pregnancies2,  hpv_smoking2, all2)
+```
